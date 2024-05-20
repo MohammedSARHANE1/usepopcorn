@@ -1,0 +1,51 @@
+*{
+  margin: 0px;
+  padding: 0px;
+}
+.App{
+  display: grid;
+  width: 100vw;
+}
+.nav-bar{
+  height: 10vh;
+
+  padding: 20px;
+  display: flex;
+  justify-content:space-between;
+  
+  background-color:blueviolet;
+
+}
+.logo{
+  display :flex;
+  gap:5px;
+   justify-content:flex-start
+   
+}
+.search{
+  width: 45vw;
+  height: 8vh;
+  border-radius: 2%;
+  background-color: rgb(164, 126, 200);
+  
+}
+.num-results{
+  font-size: 20px;
+  justify-content:baseline;
+}
+.main{
+  
+  display: flex;
+  background-color: rgba(45, 44, 44, 0.977);
+}
+.box{
+  display: flex;
+  list-style: none;
+
+}
+.btn-toggle{
+  width:1rem ;
+  height: 1rem;
+  border-radius: 50%;
+background-color: rgb(160, 156, 156);
+}
