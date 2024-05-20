@@ -5,11 +5,12 @@
 .App{
   display: grid;
   width: 100vw;
+  height: 100vh;
 }
 .nav-bar{
   height: 10vh;
 
-  padding: 20px;
+  
   display: flex;
   justify-content:space-between;
   
@@ -39,7 +40,9 @@
   background-color: rgba(45, 44, 44, 0.977);
 }
 .box{
+  
   display: flex;
+
   list-style: none;
 
 }
@@ -48,4 +51,8 @@
   height: 1rem;
   border-radius: 50%;
 background-color: rgb(160, 156, 156);
+}
+img{
+  width: 8rem;
+  height:  8rem;
 }
