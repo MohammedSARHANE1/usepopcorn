@@ -116,9 +116,10 @@ function Box({ children }) {
 
   return (
     <div className="box">
-      {isOpen && children}
+      <div className="box-movie"> {isOpen && children}</div>
+
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
-        {isOpen ? "–" : "+"}
+       {isOpen ? "–" : "+"}
       </button>
     </div>
   );
@@ -130,9 +131,9 @@ function MovieListe({ movies }) {
       {movies?.map((movie) => (
         <li key={movie.imdbID}>
           <img src={movie.Poster} alt={`${movie.Title} poster`} />
-          <h3>{movie.Title}</h3>
           <div>
-            <p>
+          <h3>{movie.Title}</h3>
+            <p >
               <span>🗓</span>
               <span>{movie.Year}</span>
             </p>
@@ -151,11 +152,11 @@ function Sammury({ watched }) {
     <>
       <div className="summary">
         <h2>Movies you watched</h2>
-        <div>
           <p>
             <span>#️⃣</span>
             <span>{watched.length} movies</span>
           </p>
+        <div className="sum">
           <p>
             <span>⭐️</span>
             <span>{avgImdbRating}</span>
@@ -179,20 +180,22 @@ function WatchList({ watched }) {
       {watched.map((movie) => (
         <li key={movie.imdbID}>
           <img src={movie.Poster} alt={`${movie.Title} poster`} />
-          <h3>{movie.Title}</h3>
           <div>
-            <p>
-              <span>⭐️</span>
-              <span>{movie.imdbRating}</span>
-            </p>
-            <p>
-              <span>🌟</span>
-              <span>{movie.userRating}</span>
-            </p>
-            <p>
-              <span>⏳</span>
-              <span>{movie.runtime} min</span>
-            </p>
+            <h3>{movie.Title}</h3>
+            <div className="sum">
+              <p>
+                <span>⭐️</span>
+                <span>{movie.imdbRating}</span>
+              </p>
+              <p>
+                <span>🌟</span>
+                <span>{movie.userRating}</span>
+              </p>
+              <p>
+                <span>⏳</span>
+                <span>{movie.runtime} min</span>
+              </p>
+            </div>
           </div>
         </li>
       ))}

@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { Rating } from "react-simple-star-rating";
 
 const styleComponent = {
-  display: "flex"
+  display: "flex",
+  gap: "100",
 };
 
-export function RatingComponent() {
+export function RatingComponent({ maxNumber = 5 }) {
   const [rating, setRating] = useState(0);
   const [tempRating, setTempRating] = useState(0);
 
@@ -15,12 +16,12 @@ export function RatingComponent() {
   };
 
   // Handle pointer move
-  const onPointerMove = (hover, index, event) => {
+  const onPointerMove = (index) => {
     setTempRating(index + 1);
   };
 
   // Handle pointer leave
-  const onPointerLeave = (event) => {
+  const onPointerLeave = () => {
     setTempRating(0);
   };
 
@@ -30,9 +31,13 @@ export function RatingComponent() {
         onClick={handleRating}
         onPointerLeave={onPointerLeave}
         onPointerMove={onPointerMove}
+        iconsCount={maxNumber}
+        size={24}
+        emptyColor="#e05"
       />
 
       <p>{tempRating !== 0 ? tempRating : rating || ""}</p>
+      
     </div>
   );
 }
