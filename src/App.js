@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RatingComponent } from "./RatingComponent";
 const tempMovieData = [
   {
@@ -49,10 +49,44 @@ const tempWatchedData = [
 ];
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
-export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
-  const [watched, setWatched] = useState(tempWatchedData);
 
+const KEY = "4d15de58";
+const query = "Lost";
+export default function App() {
+  const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
+  const [isLoading, setIsLoding] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchMovies() {
+      try {
+        setIsLoding(true);
+        const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
+        
+        if (!res.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await res.json();
+        console.log(data);
+        if(data.Response === "False"){
+         throw new Error("Movie not found");
+        }
+        setMovies(data.Search);
+        
+      }
+       catch (err) {
+        console.log(err)
+        setError(err.message);
+      }finally{
+        setIsLoding(false);
+      }
+    }
+
+    fetchMovies();
+    
+  }, []);
+  /*{isLoading ?  :  */
   return (
     <div className="App">
       <NavBar>
@@ -62,7 +96,9 @@ export default function App() {
       </NavBar>
       <Main>
         <Box>
-          <MovieListe movies={movies} />
+          {error && <ErrorMessage message={error} />}
+          {isLoading && !error && <Loader />}
+          {!isLoading && !error && <MovieListe movies={movies} />}
         </Box>
 
         <Box>
@@ -70,11 +106,16 @@ export default function App() {
           <WatchList watched={watched} />
         </Box>
       </Main>
-      <RatingComponent/>
+      <RatingComponent />
     </div>
   );
 }
-
+function Loader() {
+  return <p>LOADING...</p>;
+}
+function ErrorMessage({ message }) {
+  return <p> <span>📛</span>{message}</p>;
+}
 function NavBar({ children }) {
   return <nav className="nav-bar">{children}</nav>;
 }
@@ -119,7 +160,7 @@ function Box({ children }) {
       <div className="box-movie"> {isOpen && children}</div>
 
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
-       {isOpen ? "–" : "+"}
+        {isOpen ? "–" : "+"}
       </button>
     </div>
   );
@@ -132,8 +173,8 @@ function MovieListe({ movies }) {
         <li key={movie.imdbID}>
           <img src={movie.Poster} alt={`${movie.Title} poster`} />
           <div>
-          <h3>{movie.Title}</h3>
-            <p >
+            <h3 className="title">{movie.Title}</h3>
+            <p>
               <span>🗓</span>
               <span>{movie.Year}</span>
             </p>
@@ -152,10 +193,10 @@ function Sammury({ watched }) {
     <>
       <div className="summary">
         <h2>Movies you watched</h2>
-          <p>
-            <span>#️⃣</span>
-            <span>{watched.length} movies</span>
-          </p>
+        <p>
+          <span>#️⃣</span>
+          <span>{watched.length} movies</span>
+        </p>
         <div className="sum">
           <p>
             <span>⭐️</span>

@@ -1,15 +1,14 @@
 *{
   margin: 0px;
   padding: 0px;
+  
 }
 .App{
   display: grid;
-  width: 100vw;
-  height: 100vh;
+  
 }
 .nav-bar{
   height: 10vh;
-
   
   display: flex;
   justify-content:space-between;
@@ -42,7 +41,7 @@
 .box{
   display: flex;
   width:40vw;
-  height: 100vh;
+  
   justify-content: space-around;
  list-style: none;
  background-color: rgba(80, 76, 76, 0.977);
@@ -66,17 +65,21 @@
 }
 
 img{
-  width: 6rem;
-  height:  6rem;
+  width: 100px;
+  height: 100px;
 }
 .list{
   display:grid;
   list-style: none;
 }
 li{
-  display:flex
+  display:flex;
+  padding:10px
 }
 .sum{
   display:flex;
   gap:10px;
+}
+.title{
+  display:flex
 }
