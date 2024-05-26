@@ -5,9 +5,10 @@
 }
 
 .App {
+  
   display: grid;
   grid-template-rows: auto 1fr;
-  background-color: rgb(45, 42, 42);
+  background-color:rgba(16, 21, 19, 0.975);
   color: rgb(237, 244, 244);
   min-height: 100vh;
 }
@@ -21,7 +22,7 @@
   align-items: center;
   background-color: blueviolet;
   border-radius: 10px;
-  padding: 10px;
+  padding: 20px;
 }
 
 .logo {
@@ -60,22 +61,27 @@
 }
 
 .box {
-  display: flex;
+  display: grid;
  
   justify-content: space-between;
-  background-color: rgba(80, 76, 76, 0.225);
+  background-color:  rgba(30, 37, 33, 0.964);
   border-radius: 10px;
-  padding: 10px;
-  margin: 10px;
+  
+ 
 }
 
 .summary {
-  display: grid;
-  align-items: center;
+  display:grid;
   height: 120px;
+  padding:30px;
+
+  width: calc(50vw - 1.45em);
+  align-items:center;
   border-radius: 15px;
   background-color: rgba(80, 76, 76, 0.225); /* Same as the box class */
   box-shadow: 0 20px 20px rgba(0, 0, 0, 0.1);
+ 
+
 }
 
 .btn-toggle {
@@ -85,16 +91,18 @@
   background-color: rgb(45, 42, 42);
   font-size: 24px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  justify-self: end;
+  align-items: center;
   border: none;
   cursor: pointer;
   color:aliceblue;
+  position:absolute;
 }
 
 img {
   width: 100px;
-  height: 100px;
+  height: 153px;
   object-fit: cover;
   border-radius: 5px;
 }
@@ -109,7 +117,7 @@ img {
 
 li {
   display: flex;
-  align-items: center;
+ 
   gap: 10px;
   padding: 10px;
   border-bottom: 0.5px solid rgba(175, 175, 162, 0.077);
@@ -123,5 +131,80 @@ li {
 }
 
 .details {
-  color: antiquewhite;
+  
+ 
+  
+  padding:30px;
+  width: calc(50vw - 1.45em);
+  
+  border-radius: 15px;
+  background-color: rgba(80, 76, 76, 0.225); /* Same as the box class */
+ 
+
 }
+.btn-addList{
+  width: 11em;
+ 
+  font-size: 18px;
+  background-color: purple;
+  border-radius: 10px;
+  padding:5px;
+  margin:10px
+}
+.btn{
+  width: 1.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: rgb(45, 42, 42);
+  font-size: 24px;
+  display: flex;
+  justify-self: start;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  color:aliceblue;
+  position:absolute;
+}
+header{
+
+display:flex;
+gap:20px;
+ 
+}
+.rating{
+  display: grid;
+  justify-content: center;
+
+  justify-self: center;
+  align-items: center;
+
+padding: 20px;
+
+}
+
+ .list-watched{
+  margin-top: 30px;
+ }
+.watch-list>img{
+ height: 100px;
+ width: 60px;
+}
+.btn-delete{
+  width: 1rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: rgb(206, 52, 52);
+  font-size: 16px;
+
+  display: flex;
+  
+  justify-content: center;
+
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  color:aliceblue;
+  
+  position:relative;
+}
+

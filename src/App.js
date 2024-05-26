@@ -1,9 +1,12 @@
 import "./App.css";
 import { useEffect, useState } from "react";
-import { RatingComponent } from "./RatingComponent";
 
+import { Rating } from "react-simple-star-rating";
+const styleComponent = {
+  display: "flex",
+  gap: "100",
+};
 const KEY = "4d15de58";
-
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
@@ -14,7 +17,8 @@ export default function App() {
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [query, setQuery] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("lion");
+  const [UserRating, setUserRating] = useState(5);
 
   useEffect(() => {
     async function fetchMovies() {
@@ -61,7 +65,15 @@ export default function App() {
   const handleBack = () => {
     setSelectedId(null);
   };
-
+  function handleWatchList(movie) {
+    setWatched((watched) => [...watched, { ...movie, UserRating }]);
+  }
+  function handleUserRating(rating) {
+    setUserRating(() => rating);
+  }
+  function onDeleteWatched(id){
+    setWatched((watched)=>watched.filter(movie=>movie.imdbID!==id))
+  }
   return (
     <div className="App">
       <NavBar>
@@ -78,12 +90,16 @@ export default function App() {
           )}
         </Box>
         <Box>
-            {selectedId ? (
-              <MovieDetails selectedId={selectedId} handleBack={handleBack} />
-            ) : (
-              <Summary watched={watched} />
-            )}
-          
+          {selectedId ? (
+            <MovieDetails
+              selectedId={selectedId}
+              handleBack={handleBack}
+              handleWatchList={handleWatchList}
+              handleUserRating={handleUserRating}
+            />
+          ) : (
+            <Summary watched={watched} onDeleteWatched={onDeleteWatched} />
+          )}
         </Box>
       </Main>
     </div>
@@ -148,13 +164,13 @@ function Box({ children }) {
   return (
     <div className="box">
       {isOpen && <>{children}</>}
+
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
         {isOpen ? "–" : "+"}
       </button>
     </div>
   );
 }
-
 function MovieList({ movies, handleSelected }) {
   return (
     <ul className="list">
@@ -174,37 +190,62 @@ function MovieList({ movies, handleSelected }) {
   );
 }
 
-function Summary({ watched }) {
+function Summary({ watched, UserRating, onDeleteWatched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
-  const avgUserRating = average(watched.map((movie) => movie.userRating));
-  const avgRuntime = average(watched.map((movie) => movie.runtime));
+  const avgUserRating = average(
+    watched.map((movie) => Number(movie.UserRating))
+  );
+  const avgRuntime = average(
+    watched.map((movie) => Number(movie.Runtime.split(" ")[0]))
+  );
 
   return (
-    <div className="summary">
-      <h2>Movies you watched</h2>
-      <div style={{ display: "flex", gap: "10px" }}>
-        <span>#️⃣</span>
-        <span>{watched.length} movies</span>
-        <p>
-          <span>⭐️</span>
-          <span>{avgImdbRating.toFixed(1)}</span>
-        </p>
-        <p>
-          <span>🌟</span>
-          <span>{avgUserRating.toFixed(1)}</span>
-        </p>
-        <p>
-          <span>⏳</span>
-          <span>{avgRuntime.toFixed(1)} min</span>
-        </p>
+    <>
+      <div className="summary">
+        <h2>Movies you watched</h2>
+        <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+              paddingTop: "30px",
+            }}
+          >
+            <span>#️⃣</span>
+            <span>{watched.length} movies</span>
+            <p>
+              <span>⭐️</span>
+              <span>{avgImdbRating.toFixed(1)}</span>
+            </p>
+            <p>
+              <span>🌟</span>
+              <span>{avgUserRating.toFixed(1)}</span>
+            </p>
+            <p>
+              <span>⏳</span>
+              <span>{avgRuntime.toFixed(1)} min</span>
+            </p>
+          </div>
+        </div>
+        <ul className="list-watched">
+          {watched.map((movie) => (
+            <MovieWatch movie={movie} onDeleteWatched={onDeleteWatched} />
+          ))}
+        </ul>
       </div>
-    </div>
+    </>
   );
 }
 
-function MovieDetails({ selectedId, handleBack }) {
+function MovieDetails({
+  selectedId,
+  handleBack,
+  handleWatchList,
+  handleUserRating,
+}) {
   const [movie, setMovie] = useState({});
 
+  console.log(movie);
   useEffect(() => {
     async function fetchMovieDetails() {
       const res = await fetch(
@@ -229,26 +270,117 @@ function MovieDetails({ selectedId, handleBack }) {
   } = movie;
 
   return (
-    <div>
-      <button className="btn-toggle" onClick={handleBack}>
+    <>
+      <button className="btn" onClick={handleBack}>
         ⬅
       </button>
-      <header>
-        <img src={Poster} alt={`${Title} poster`} />
+      <div className="details">
+        <header>
+          <img src={Poster} alt={`${Title} poster`} />
+          <div>
+            <h3>{Title}</h3>
+            <p>{`${Released} - ${Runtime}`}</p>
+            <p>{Genre}</p>
+            <p>{`⭐ ${imdbRating} IMDB rating`}</p>
+          </div>
+        </header>
+        <section>
+          <div className="rating">
+            <RatingComponent
+              maxNumber={10}
+              size={24}
+              handleUserRating={handleUserRating}
+            />
+            <button
+              className="btn-addList"
+              onClick={() => {
+                handleWatchList(movie);
+                handleBack();
+              }}
+            >
+              Add to my watched list
+            </button>
+          </div>
+
+          <p>{Plot}</p>
+          <p>{Actors}</p>
+          <p>{Director}</p>
+        </section>
+      </div>
+    </>
+  );
+}
+function MovieWatch({ movie, onDeleteWatched }) {
+  return (
+    <>
+      <li key={movie.Title} className="watch-list">
+        <img src={movie.Poster} alt={`${movie.Title} poster`} />
         <div>
-          <h2>{Title}</h2>
-          <p>{`${Released} - ${Runtime}`}</p>
-          <p>{`⭐ ${imdbRating} IMDB rating`}</p>
+          <h4>{movie.Title}</h4>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "20px",
+              paddingTop: "30px",
+            }}
+          >
+            <p>
+              <span>⭐️</span>
+              <span>{movie.imdbRating}</span>
+            </p>
+            <p>
+              <span>🌟</span>
+              <span>{movie.UserRating}</span>
+            </p>
+            <p>
+              <span>⏳</span>
+              <span>{movie.Runtime} </span>
+            </p>
+          </div>
         </div>
-      </header>
-      <section>
-        <RatingComponent maxNumber={10} size={24} />
-        <p>{Plot}</p>
-        <p>{Actors}</p>
-        <p>{Director}</p>
-      </section>
-    </div>
+        <button
+          className="btn-delete"
+          onClick={() => onDeleteWatched(movie.imdbID)}
+        >
+          X
+        </button>
+      </li>
+    </>
   );
 }
 
+function RatingComponent({ maxNumber = 5, handleUserRating }) {
+  const [rating, setRating] = useState(0);
+  const [tempRating, setTempRating] = useState(0);
+  handleUserRating(rating);
 
+  const handleRating = (event) => {
+    setRating(event);
+  };
+
+  // Handle pointer move
+  const onPointerMove = (index) => {
+    setTempRating(index + 1);
+  };
+
+  // Handle pointer leave
+  const onPointerLeave = () => {
+    setTempRating(0);
+  };
+
+  return (
+    <div style={styleComponent}>
+      <Rating
+        onClick={handleRating}
+        onPointerLeave={onPointerLeave}
+        onPointerMove={onPointerMove}
+        iconsCount={maxNumber}
+        size={24}
+        emptyColor="#000"
+      />
+
+      <p>{tempRating !== 0 ? tempRating : rating || ""}</p>
+    </div>
+  );
+}
