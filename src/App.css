@@ -20,7 +20,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: blueviolet;
+  background-color: rgb(70, 3, 112);
   border-radius: 10px;
   padding: 20px;
 }
@@ -42,7 +42,7 @@
   width: 45vw;
   height: 8vh;
   border-radius: 5px;
-  background-color: rgb(164, 126, 200);
+  background-color: rgb(233, 3, 254);
   border: none;
   padding: 10px;
   font-size: 16px;
@@ -132,57 +132,63 @@ li {
 
 .details {
   
- 
-  
-  padding:30px;
   width: calc(50vw - 1.45em);
-  
+  align-items:center;
+  font-size: 14px;
   border-radius: 15px;
-  background-color: rgba(80, 76, 76, 0.225); /* Same as the box class */
+  background-color:  rgba(30, 37, 33, 0.964);
+  box-shadow: 0 20px 20px rgba(0, 0, 0, 0.1);
  
-
 }
+.detail {
+  display: grid;
+  padding:5px;
+}
+
 .btn-addList{
   width: 11em;
- 
   font-size: 18px;
   background-color: purple;
   border-radius: 10px;
-  padding:5px;
-  margin:10px
+  
 }
 .btn{
   width: 1.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background-color: rgb(45, 42, 42);
+  background-color: aliceblue;
   font-size: 24px;
   display: flex;
   justify-self: start;
   align-items: center;
   border: none;
   cursor: pointer;
-  color:aliceblue;
+  color:rgb(45, 42, 42);
+ 
   position:absolute;
 }
 header{
 
 display:flex;
-gap:20px;
+gap:20px; 
+background-color: rgba(80, 76, 76, 0.225); /* Same as the box class */
+;
  
 }
 .rating{
-  display: grid;
-  justify-content: center;
-
-  justify-self: center;
-  align-items: center;
-
-padding: 20px;
-
+  display:grid;
+  height: 12vh;
+  width: 40vw;
+ justify-items: center;
+  border-radius: 15px;
+  background-color: rgba(80, 76, 76, 0.225); /* Same as the box class */
+  padding: 9px;
+  margin: 30px;
+  
 }
 
  .list-watched{
+  display: grid;
   margin-top: 30px;
  }
 .watch-list>img{
@@ -190,21 +196,42 @@ padding: 20px;
  width: 60px;
 }
 .btn-delete{
-  width: 1rem;
-  height: 2rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 50%;
   background-color: rgb(206, 52, 52);
   font-size: 16px;
-
   display: flex;
-  
   justify-content: center;
-
   align-items: center;
+  justify-self: end;
+  
+
   border: none;
   cursor: pointer;
-  color:aliceblue;
+  color:rgb(12, 13, 14);
   
-  position:relative;
+  position:absolute;
 }
 
+
+.rating-com{
+  display: flex;
+  gap:5px;
+  font-size :14px;
+}
+.plot{
+  display:grid;
+  height: 30vh;
+  width: 40vw;
+
+  border-radius: 15px;
+  background-color: rgba(80, 76, 76, 0.225); /* Same as the box class */
+  padding: 9px;
+  margin: 30px;
+  
+}
+.plot>p{
+  padding-left:10px;
+ font-size:16px;
+}

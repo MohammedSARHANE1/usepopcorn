@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Rating } from "react-simple-star-rating";
 const styleComponent = {
   display: "flex",
-  gap: "100",
 };
 const KEY = "4d15de58";
 const average = (arr) =>
@@ -18,7 +17,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("lion");
-  const [UserRating, setUserRating] = useState(5);
+  const [UserRating, setUserRating] = useState(null);
 
   useEffect(() => {
     async function fetchMovies() {
@@ -46,6 +45,7 @@ export default function App() {
     }
 
     if (search) {
+      handleBack()
       fetchMovies();
     }
   }, [search]);
@@ -66,14 +66,42 @@ export default function App() {
     setSelectedId(null);
   };
   function handleWatchList(movie) {
-    setWatched((watched) => [...watched, { ...movie, UserRating }]);
+    const uniqueMovies = (watched) => {
+      const movieSet = new Set();
+      return watched.filter((movie) => {
+        const isDuplicate = movieSet.has(movie.imdbID);
+        movieSet.add(movie.imdbID);
+        return !isDuplicate;
+      });
+    };
+
+    setWatched((prevWatched) => {
+      const updatedWatched = [...prevWatched, { ...movie, UserRating }];
+      return uniqueMovies(updatedWatched); // Returning the result of uniqueMovies
+    });
   }
+
+  console.log(watched);
   function handleUserRating(rating) {
     setUserRating(() => rating);
   }
-  function onDeleteWatched(id){
-    setWatched((watched)=>watched.filter(movie=>movie.imdbID!==id))
+  function onDeleteWatched(id) {
+    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
+  useEffect(
+    function () {
+      function callSearch(e) {
+        if (e.code === "Enter") {
+          handleClick();
+        }
+      }
+      document.addEventListener("keydown", callSearch);
+      return function () {
+        document.removeEventListener("keydown", callSearch);
+      };
+    },
+    [handleClick]
+  );
   return (
     <div className="App">
       <NavBar>
@@ -96,6 +124,7 @@ export default function App() {
               handleBack={handleBack}
               handleWatchList={handleWatchList}
               handleUserRating={handleUserRating}
+              UserRating={UserRating}
             />
           ) : (
             <Summary watched={watched} onDeleteWatched={onDeleteWatched} />
@@ -190,7 +219,7 @@ function MovieList({ movies, handleSelected }) {
   );
 }
 
-function Summary({ watched, UserRating, onDeleteWatched }) {
+function Summary({ watched, onDeleteWatched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(
     watched.map((movie) => Number(movie.UserRating))
@@ -229,7 +258,17 @@ function Summary({ watched, UserRating, onDeleteWatched }) {
         </div>
         <ul className="list-watched">
           {watched.map((movie) => (
-            <MovieWatch movie={movie} onDeleteWatched={onDeleteWatched} />
+            <li key={movie.imdbID} className="watch-list">
+              <MovieWatch movie={movie} />
+              <div style={{ display: "grid", marginLeft: "30px" }}>
+                <button
+                  className="btn-delete"
+                  onClick={() => onDeleteWatched(movie.imdbID)}
+                >
+                  X
+                </button>
+              </div>
+            </li>
           ))}
         </ul>
       </div>
@@ -239,6 +278,7 @@ function Summary({ watched, UserRating, onDeleteWatched }) {
 
 function MovieDetails({
   selectedId,
+  UserRating,
   handleBack,
   handleWatchList,
   handleUserRating,
@@ -268,6 +308,32 @@ function MovieDetails({
     Actors,
     Director,
   } = movie;
+  useEffect(
+    function () {
+      if (!Title) return;
+      document.title = `movie | ${Title}`;
+      return function () {
+        document.title = "usePopcorn";
+      };
+    },
+
+    [Title]
+  );
+
+  useEffect(
+    function () {
+      function callback(e) {
+        if (e.code === "Escape") {
+          handleBack();
+        }
+      }
+      document.addEventListener("keydown", callback);
+      return function () {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [handleBack]
+  );
 
   return (
     <>
@@ -277,8 +343,8 @@ function MovieDetails({
       <div className="details">
         <header>
           <img src={Poster} alt={`${Title} poster`} />
-          <div>
-            <h3>{Title}</h3>
+          <div className="detail">
+            <h2>{Title}</h2>
             <p>{`${Released} - ${Runtime}`}</p>
             <p>{Genre}</p>
             <p>{`⭐ ${imdbRating} IMDB rating`}</p>
@@ -288,23 +354,27 @@ function MovieDetails({
           <div className="rating">
             <RatingComponent
               maxNumber={10}
-              size={24}
+              size={15}
               handleUserRating={handleUserRating}
             />
-            <button
-              className="btn-addList"
-              onClick={() => {
-                handleWatchList(movie);
-                handleBack();
-              }}
-            >
-              Add to my watched list
-            </button>
+            {UserRating > 0 && (
+              <button
+                className="btn-addList"
+                onClick={() => {
+                  handleWatchList(movie);
+                  handleBack();
+                }}
+              >
+                Add to my watched list
+              </button>
+            )}
           </div>
 
-          <p>{Plot}</p>
-          <p>{Actors}</p>
-          <p>{Director}</p>
+          <div className="plot">
+            <p>{Plot}</p>
+            <p>{Actors}</p>
+            <p>{Director}</p>
+          </div>
         </section>
       </div>
     </>
@@ -313,39 +383,31 @@ function MovieDetails({
 function MovieWatch({ movie, onDeleteWatched }) {
   return (
     <>
-      <li key={movie.Title} className="watch-list">
-        <img src={movie.Poster} alt={`${movie.Title} poster`} />
-        <div>
-          <h4>{movie.Title}</h4>
+      <img src={movie.Poster} alt={`${movie.Title} poster`} />
+      <div>
+        <h4>{movie.Title}</h4>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "20px",
-              paddingTop: "30px",
-            }}
-          >
-            <p>
-              <span>⭐️</span>
-              <span>{movie.imdbRating}</span>
-            </p>
-            <p>
-              <span>🌟</span>
-              <span>{movie.UserRating}</span>
-            </p>
-            <p>
-              <span>⏳</span>
-              <span>{movie.Runtime} </span>
-            </p>
-          </div>
-        </div>
-        <button
-          className="btn-delete"
-          onClick={() => onDeleteWatched(movie.imdbID)}
+        <div
+          style={{
+            display: "flex",
+            gap: "20px",
+            paddingTop: "30px",
+          }}
         >
-          X
-        </button>
-      </li>
+          <p>
+            <span>⭐️</span>
+            <span>{movie.imdbRating}</span>
+          </p>
+          <p>
+            <span>🌟</span>
+            <span>{movie.UserRating}</span>
+          </p>
+          <p>
+            <span>⏳</span>
+            <span>{movie.Runtime} </span>
+          </p>
+        </div>
+      </div>
     </>
   );
 }
@@ -361,7 +423,7 @@ function RatingComponent({ maxNumber = 5, handleUserRating }) {
 
   // Handle pointer move
   const onPointerMove = (index) => {
-    setTempRating(index + 1);
+    setTempRating(index);
   };
 
   // Handle pointer leave
@@ -370,16 +432,17 @@ function RatingComponent({ maxNumber = 5, handleUserRating }) {
   };
 
   return (
-    <div style={styleComponent}>
-      <Rating
-        onClick={handleRating}
-        onPointerLeave={onPointerLeave}
-        onPointerMove={onPointerMove}
-        iconsCount={maxNumber}
-        size={24}
-        emptyColor="#000"
-      />
-
+    <div className="rating-com">
+      <div>
+        <Rating
+          onClick={handleRating}
+          onPointerLeave={onPointerLeave}
+          onPointerMove={onPointerMove}
+          iconsCount={maxNumber}
+          size={20}
+          emptyColor="#000"
+        />
+      </div>
       <p>{tempRating !== 0 ? tempRating : rating || ""}</p>
     </div>
   );

@@ -9,7 +9,8 @@ const styleComponent = {
 export function RatingComponent({ maxNumber = 5,handleUserRating } ) {
   const [rating, setRating] = useState(0);
   const [tempRating, setTempRating] = useState(0);
-  handleUserRating(rating)
+  
+handleUserRating(rating)
   
   const handleRating = (event) => {
     setRating(event);
