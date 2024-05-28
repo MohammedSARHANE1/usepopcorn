@@ -60,6 +60,29 @@
   padding: 10px;
 }
 
+.lader {display:grid;
+  height: 120px;
+  padding:30px;
+ justify-items: center;
+  width: calc(50vw - 1.45em);
+  align-items:center;
+  border-radius: 15px;
+  background-color: rgba(80, 76, 76, 0.225); /* Same as the box class */
+  box-shadow: 0 20px 20px rgba(0, 0, 0, 0.1);}
+.error {
+  display:grid;
+  height: 120px;
+  padding:20px;
+ justify-items: center;
+  width: calc(50vw - 1.45em);
+  align-items:center;
+  border-radius: 15px;
+  background-color: rgba(80, 76, 76, 0.225); /* Same as the box class */
+  box-shadow: 0 20px 20px rgba(0, 0, 0, 0.1);
+ 
+
+}
+
 .box {
   display: grid;
  

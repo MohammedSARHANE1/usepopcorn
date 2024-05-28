@@ -1,23 +1,70 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Rating } from "react-simple-star-rating";
-const styleComponent = {
-  display: "flex",
-};
+
 const KEY = "4d15de58";
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [query, setQuery] = useState("");
-  const [search, setSearch] = useState("lion");
-  const [UserRating, setUserRating] = useState(null);
+  const [search, setSearch] = useState("");
+  const [UserRating, setUserRating] = useState(0);
+
+    const [watched, setWatched] = useState(() => {
+      const storageValue = localStorage.getItem("watched");
+      return storageValue ? JSON.parse(storageValue) : [];
+    });
+
+  const handleSelected = (id) => {
+    setSelectedId(()=>id);
+  };
+
+  const handleChange = (e) => {
+    setQuery(()=>e.target.value);
+  };
+
+  const handleClick = () => {
+    setSearch(()=> query);
+  };
+
+  const handleBack = () => {
+    setSelectedId(null);
+  };
+  function handleWatchList(movie) {
+    const uniqueMovies = (watched) => {
+      const movieSet = new Set();
+      return watched.filter((movie) => {
+        const isDuplicate = movieSet.has(movie.imdbID);
+        movieSet.add(movie.imdbID);
+        return !isDuplicate;
+      });
+    };
+
+    setWatched((prevWatched) => {
+      const updatedWatched = [...prevWatched, { ...movie, UserRating }];
+      return uniqueMovies(updatedWatched); // Returning the result of uniqueMovies
+    });
+  }
+
+  function handleUserRating(rating) {
+    setUserRating(rating);
+  }
+  function onDeleteWatched(id) {
+    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
+  }
+
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   useEffect(() => {
     async function fetchMovies() {
@@ -45,49 +92,10 @@ export default function App() {
     }
 
     if (search) {
-      handleBack()
+      handleBack();
       fetchMovies();
     }
   }, [search]);
-
-  const handleSelected = (id) => {
-    setSelectedId(id);
-  };
-
-  const handleChange = (e) => {
-    setQuery(e.target.value);
-  };
-
-  const handleClick = () => {
-    setSearch(query);
-  };
-
-  const handleBack = () => {
-    setSelectedId(null);
-  };
-  function handleWatchList(movie) {
-    const uniqueMovies = (watched) => {
-      const movieSet = new Set();
-      return watched.filter((movie) => {
-        const isDuplicate = movieSet.has(movie.imdbID);
-        movieSet.add(movie.imdbID);
-        return !isDuplicate;
-      });
-    };
-
-    setWatched((prevWatched) => {
-      const updatedWatched = [...prevWatched, { ...movie, UserRating }];
-      return uniqueMovies(updatedWatched); // Returning the result of uniqueMovies
-    });
-  }
-
-  console.log(watched);
-  function handleUserRating(rating) {
-    setUserRating(() => rating);
-  }
-  function onDeleteWatched(id) {
-    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
-  }
   useEffect(
     function () {
       function callSearch(e) {
@@ -100,7 +108,7 @@ export default function App() {
         document.removeEventListener("keydown", callSearch);
       };
     },
-    [handleClick]
+    [query]
   );
   return (
     <div className="App">
@@ -136,15 +144,19 @@ export default function App() {
 }
 
 function Loader() {
-  return <p>LOADING...</p>;
+  return (
+    <div className="lader">
+      <p>LOADING...</p>
+    </div>
+  );
 }
 
 function ErrorMessage({ message }) {
   return (
-    <p>
+    <div className="error">
       <span>📛</span>
       {message}
-    </p>
+    </div>
   );
 }
 
@@ -162,6 +174,11 @@ function Logo() {
 }
 
 function Search({ handleChange, handleClick }) {
+  const inputRef=useRef(null);
+  useEffect(function(){
+  
+    inputRef.current.focus();
+  },[])
   return (
     <>
       <input
@@ -169,6 +186,7 @@ function Search({ handleChange, handleClick }) {
         type="text"
         placeholder=" Search movies..."
         onChange={handleChange}
+        ref={inputRef}
       />
       <button onClick={handleClick}>🔎</button>
     </>
@@ -283,9 +301,29 @@ function MovieDetails({
   handleWatchList,
   handleUserRating,
 }) {
+  const countRef=useRef(1)
   const [movie, setMovie] = useState({});
+  const countRtingDecisions=countRef.current;
+  const {
+    Poster,
+    Title,
+    Released,
+    Runtime,
+    Genre,
+    imdbRating,
+    Plot,
+    Actors,
+    Director,
 
-  console.log(movie);
+    
+
+  
+  } = movie;
+ console.log(countRtingDecisions)
+    useEffect(() => {
+     if(UserRating)countRef.current++;
+    },[UserRating]);
+
   useEffect(() => {
     async function fetchMovieDetails() {
       const res = await fetch(
@@ -297,17 +335,6 @@ function MovieDetails({
     fetchMovieDetails();
   }, [selectedId]);
 
-  const {
-    Poster,
-    Title,
-    Released,
-    Runtime,
-    Genre,
-    imdbRating,
-    Plot,
-    Actors,
-    Director,
-  } = movie;
   useEffect(
     function () {
       if (!Title) return;
@@ -380,7 +407,8 @@ function MovieDetails({
     </>
   );
 }
-function MovieWatch({ movie, onDeleteWatched }) {
+function MovieWatch({ movie,}) {
+ 
   return (
     <>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
@@ -415,7 +443,7 @@ function MovieWatch({ movie, onDeleteWatched }) {
 function RatingComponent({ maxNumber = 5, handleUserRating }) {
   const [rating, setRating] = useState(0);
   const [tempRating, setTempRating] = useState(0);
-  handleUserRating(rating);
+  
 
   const handleRating = (event) => {
     setRating(event);
@@ -430,7 +458,7 @@ function RatingComponent({ maxNumber = 5, handleUserRating }) {
   const onPointerLeave = () => {
     setTempRating(0);
   };
-
+ handleUserRating(rating);
   return (
     <div className="rating-com">
       <div>
