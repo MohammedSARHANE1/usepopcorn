@@ -1,41 +1,39 @@
 import "./App.css";
 import { useEffect, useRef, useState } from "react";
-
+import { useMovies } from "./useMovies";
 import { Rating } from "react-simple-star-rating";
+import { useLocaleStorage } from "./useLocaleStorage";
+import { useKey } from "./useKey";
 
 const KEY = "4d15de58";
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-  const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
   const [UserRating, setUserRating] = useState(0);
+  
+  const [watched,setWatched]=useLocaleStorage([],"watched")
+  const handleClick = () => {
+    setSearch(() => query);
 
-    const [watched, setWatched] = useState(() => {
-      const storageValue = localStorage.getItem("watched");
-      return storageValue ? JSON.parse(storageValue) : [];
-    });
-
+  };
+  const handleBack = () => {
+    setSelectedId(null);
+    
+  };
+  const { movies, isLoading, error } = useMovies(handleBack, search);
+   
   const handleSelected = (id) => {
-    setSelectedId(()=>id);
+    setSelectedId(() => id);
   };
 
   const handleChange = (e) => {
-    setQuery(()=>e.target.value);
+    setQuery(() => e.target.value);
   };
 
-  const handleClick = () => {
-    setSearch(()=> query);
-  };
-
-  const handleBack = () => {
-    setSelectedId(null);
-  };
   function handleWatchList(movie) {
     const uniqueMovies = (watched) => {
       const movieSet = new Set();
@@ -59,62 +57,19 @@ export default function App() {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    },
-    [watched]
-  );
-
-  useEffect(() => {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${search}`
-        );
-
-        if (!res.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await res.json();
-
-        if (data.Response === "False") {
-          throw new Error("Movie not found");
-        }
-        setMovies(data.Search);
-      } catch (err) {
-        console.log(err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (search) {
-      handleBack();
-      fetchMovies();
-    }
-  }, [search]);
-  useEffect(
-    function () {
-      function callSearch(e) {
-        if (e.code === "Enter") {
-          handleClick();
-        }
-      }
-      document.addEventListener("keydown", callSearch);
-      return function () {
-        document.removeEventListener("keydown", callSearch);
-      };
-    },
-    [query]
-  );
+  
+useKey("Enter", handleClick);
+ 
   return (
     <div className="App">
       <NavBar>
         <Logo />
-        <Search handleChange={handleChange} handleClick={handleClick} />
+        <Search
+        
+          setQuery={setQuery}
+          handleChange={handleChange}
+          handleClick={handleClick}
+        />
         <NumResult movies={movies} />
       </NavBar>
       <Main>
@@ -173,12 +128,15 @@ function Logo() {
   );
 }
 
-function Search({ handleChange, handleClick }) {
-  const inputRef=useRef(null);
-  useEffect(function(){
+function Search({ handleChange, handleClick ,setQuery}) {
+  const inputRef = useRef(null);
+   useKey("enter",function(){
+    if(document.activeElement!==inputRef.current){
+      inputRef.current.focus();
+      setQuery("");
+    }
+     })
   
-    inputRef.current.focus();
-  },[])
   return (
     <>
       <input
@@ -301,9 +259,9 @@ function MovieDetails({
   handleWatchList,
   handleUserRating,
 }) {
-  const countRef=useRef(1)
+  const countRef = useRef(1);
   const [movie, setMovie] = useState({});
-  const countRtingDecisions=countRef.current;
+  const countRtingDecisions = countRef.current;
   const {
     Poster,
     Title,
@@ -314,15 +272,11 @@ function MovieDetails({
     Plot,
     Actors,
     Director,
-
-    
-
-  
   } = movie;
- console.log(countRtingDecisions)
-    useEffect(() => {
-     if(UserRating)countRef.current++;
-    },[UserRating]);
+  console.log(countRtingDecisions);
+  useEffect(() => {
+    if (UserRating) countRef.current++;
+  }, [UserRating]);
 
   useEffect(() => {
     async function fetchMovieDetails() {
@@ -346,21 +300,8 @@ function MovieDetails({
 
     [Title]
   );
-
-  useEffect(
-    function () {
-      function callback(e) {
-        if (e.code === "Escape") {
-          handleBack();
-        }
-      }
-      document.addEventListener("keydown", callback);
-      return function () {
-        document.removeEventListener("keydown", callback);
-      };
-    },
-    [handleBack]
-  );
+useKey("Escape", handleBack);
+  
 
   return (
     <>
@@ -407,8 +348,7 @@ function MovieDetails({
     </>
   );
 }
-function MovieWatch({ movie,}) {
- 
+function MovieWatch({ movie }) {
   return (
     <>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
@@ -443,7 +383,6 @@ function MovieWatch({ movie,}) {
 function RatingComponent({ maxNumber = 5, handleUserRating }) {
   const [rating, setRating] = useState(0);
   const [tempRating, setTempRating] = useState(0);
-  
 
   const handleRating = (event) => {
     setRating(event);
@@ -458,7 +397,7 @@ function RatingComponent({ maxNumber = 5, handleUserRating }) {
   const onPointerLeave = () => {
     setTempRating(0);
   };
- handleUserRating(rating);
+  handleUserRating(rating);
   return (
     <div className="rating-com">
       <div>
